@@ -27,6 +27,8 @@ export default [
       '**/node_modules/',
       '**/build/',
       '**/dist/',
+      '**/.cache/',
+      '**/.netlify/',
       '**/*.graphql.d.ts',
       '**/*.graphql.ts',
       '**/*.generated.d.ts',

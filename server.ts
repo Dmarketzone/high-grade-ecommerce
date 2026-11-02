@@ -43,6 +43,10 @@ export default async function handler(
 
     const response = await handleRequest(request);
 
+    // V1 is a review storefront, including all curated and mock.shop listings.
+    // Remove intentionally only after real catalog, policies and launch review.
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+
     if (hydrogenContext.session.isPending) {
       response.headers.set(
         'Set-Cookie',

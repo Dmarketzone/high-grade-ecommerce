@@ -1,231 +1,147 @@
-import {Suspense} from 'react';
-import {Await, NavLink, useAsyncValue} from 'react-router';
-import {
-  type CartViewPayload,
-  useAnalytics,
-  useOptimisticCart,
-} from '@shopify/hydrogen';
-import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
-
-interface HeaderProps {
-  header: HeaderQuery;
-  cart: Promise<CartApiQueryFragment | null>;
-  isLoggedIn: Promise<boolean>;
-  publicStoreDomain: string;
-}
-
-type Viewport = 'desktop' | 'mobile';
-
-export function Header({
-  header,
-  isLoggedIn,
-  cart,
-  publicStoreDomain,
-}: HeaderProps) {
-  const {shop, menu} = header;
+import {Suspense, useState} from 'react';
+import {Await, Form, Link, NavLink, useAsyncValue} from 'react-router';
+import {useOptimisticCart} from '@shopify/hydrogen';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {Icon} from './Icon';
+import {useAside} from './Aside';
+const NAV = [
+  {to: '/shop', label: 'Shop all'},
+  {to: '/shop/speakers-subwoofers', label: 'Car audio'},
+  {to: '/shop/oem-audio', label: 'OEM upgrades'},
+  {to: '/shop/radar-laser', label: 'Driver technology'},
+  {to: '/vehicle', label: 'Shop by vehicle'},
+];
+export function Header({cart}: {cart: Promise<CartApiQueryFragment | null>}) {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
-      </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
-    </header>
-  );
-}
-
-export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
-  viewport,
-  publicStoreDomain,
-}: {
-  menu: HeaderProps['header']['menu'];
-  primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
-  viewport: Viewport;
-  publicStoreDomain: HeaderProps['publicStoreDomain'];
-}) {
-  const className = `header-menu-${viewport}`;
-  const {close} = useAside();
-
-  return (
-    <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
-
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        return (
-          <NavLink
-            className="header-menu-item"
-            end
-            key={item.id}
-            onClick={close}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
+    <>
+      <div className="utility-bar">
+        <div className="container">
+          <span>EXPERTLY SELECTED. PROFESSIONALLY INSTALLED.</span>
+          <a href="tel:+13052591035">
+            Miami, FL <span className="utility-dot">·</span> (305) 259-1035{' '}
+            <Icon name="arrow" size={13} />
+          </a>
+        </div>
+      </div>
+      <header className="site-header">
+        <div className="container header-main">
+          <Link
+            to="/"
+            className="brand-logo"
+            aria-label="High Grade Sound & Security home"
           >
-            {item.title}
-          </NavLink>
-        );
-      })}
-    </nav>
+            <img
+              src="/images/high-grade-logo.webp"
+              width="160"
+              height="114"
+              alt="High Grade Sound & Security"
+            />
+          </Link>
+          <Form
+            action="/shop"
+            method="get"
+            className="header-search"
+            role="search"
+          >
+            <Icon name="search" size={18} />
+            <input
+              aria-label="Search the High Grade catalog"
+              name="q"
+              placeholder="Find your next upgrade"
+              type="search"
+            />
+            <button aria-label="Search catalog" type="submit">
+              <Icon name="arrow" size={18} />
+            </button>
+          </Form>
+          <div className="header-actions">
+            <Link className="consult-link" to="/consultation">
+              Speak with an expert <Icon name="arrow" size={16} />
+            </Link>
+            <Suspense fallback={<CartLink count={0} />}>
+              <Await resolve={cart} errorElement={<CartLink count={0} />}>
+                <CartCount />
+              </Await>
+            </Suspense>
+            <button
+              type="button"
+              className="mobile-menu-button icon-button"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-controls="mobile-navigation"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Icon name={menuOpen ? 'close' : 'menu'} />
+            </button>
+          </div>
+        </div>
+        <nav
+          className="desktop-navigation container"
+          aria-label="Main navigation"
+        >
+          <div>
+            {NAV.map((item) => (
+              <NavLink key={item.to} to={item.to} end>
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+          <Link to="/brands">
+            Our brands <Icon name="chevron" size={12} />
+          </Link>
+        </nav>
+        <nav
+          id="mobile-navigation"
+          className="mobile-navigation"
+          aria-label="Mobile navigation"
+          hidden={!menuOpen}
+        >
+          {[
+            ...NAV,
+            {to: '/brands', label: 'Our brands'},
+            {to: '/consultation', label: 'Book a consultation'},
+            {to: '/demo-shop', label: 'Try the demo shop'},
+          ].map((item) => (
+            <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)}>
+              {item.label}
+              <Icon name="arrow" size={16} />
+            </Link>
+          ))}
+        </nav>
+      </header>
+      <div className="demo-notice">
+        HIGH GRADE PREVIEW{' '}
+        <span>
+          Explore the catalog. Pricing & fitment confirmed by our team.
+        </span>
+        <Link to="/demo-shop">
+          Try the demo cart <Icon name="arrow" size={12} />
+        </Link>
+      </div>
+    </>
   );
 }
-
-function HeaderCtas({
-  isLoggedIn,
-  cart,
-}: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
-  return (
-    <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
-          </Await>
-        </Suspense>
-      </NavLink>
-      <SearchToggle />
-      <CartToggle cart={cart} />
-    </nav>
-  );
-}
-
-function HeaderMenuMobileToggle() {
+function CartLink({count}: {count: number}) {
   const {open} = useAside();
   return (
-    <button
-      className="header-menu-mobile-toggle reset"
-      onClick={() => open('mobile')}
-    >
-      <h3>☰</h3>
-    </button>
-  );
-}
-
-function SearchToggle() {
-  const {open} = useAside();
-  return (
-    <button className="reset" onClick={() => open('search')}>
-      Search
-    </button>
-  );
-}
-
-function CartBadge({count}: {count: number | null}) {
-  const {open} = useAside();
-  const {publish, shop, cart, prevCart} = useAnalytics();
-
-  return (
-    <a
-      href="/cart"
-      onClick={(e) => {
-        e.preventDefault();
+    <Link
+      className="cart-link"
+      to="/cart"
+      aria-label={`Demo cart, ${count} items`}
+      onClick={(event) => {
+        event.preventDefault();
         open('cart');
-        publish('cart_viewed', {
-          cart,
-          prevCart,
-          shop,
-          url: window.location.href || '',
-        } as CartViewPayload);
       }}
     >
-      Cart {count === null ? <span>&nbsp;</span> : count}
-    </a>
+      <Icon name="bag" size={21} />
+      <span className="cart-count">{count}</span>
+    </Link>
   );
 }
-
-function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
-  return (
-    <Suspense fallback={<CartBadge count={null} />}>
-      <Await resolve={cart}>
-        <CartBanner />
-      </Await>
-    </Suspense>
+function CartCount() {
+  const cart = useOptimisticCart(
+    useAsyncValue() as CartApiQueryFragment | null,
   );
-}
-
-function CartBanner() {
-  const originalCart = useAsyncValue() as CartApiQueryFragment | null;
-  const cart = useOptimisticCart(originalCart);
-  return <CartBadge count={cart?.totalQuantity ?? 0} />;
-}
-
-const FALLBACK_HEADER_MENU = {
-  id: 'gid://shopify/Menu/199655587896',
-  items: [
-    {
-      id: 'gid://shopify/MenuItem/461609500728',
-      resourceId: null,
-      tags: [],
-      title: 'Collections',
-      type: 'HTTP',
-      url: '/collections',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609533496',
-      resourceId: null,
-      tags: [],
-      title: 'Blog',
-      type: 'HTTP',
-      url: '/blogs/journal',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609566264',
-      resourceId: null,
-      tags: [],
-      title: 'Policies',
-      type: 'HTTP',
-      url: '/policies',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609599032',
-      resourceId: 'gid://shopify/Page/92591030328',
-      tags: [],
-      title: 'About',
-      type: 'PAGE',
-      url: '/pages/about',
-      items: [],
-    },
-  ],
-};
-
-function activeLinkStyle({
-  isActive,
-  isPending,
-}: {
-  isActive: boolean;
-  isPending: boolean;
-}) {
-  return {
-    fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'black',
-  };
+  return <CartLink count={cart?.totalQuantity ?? 0} />;
 }

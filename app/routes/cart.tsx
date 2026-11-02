@@ -1,15 +1,11 @@
-import {
-  useLoaderData,
-  data,
-  type HeadersFunction,
-} from 'react-router';
+import {useLoaderData, data, type HeadersFunction} from 'react-router';
 import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{title: 'Demo Cart | High Grade Sound & Security'}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -110,7 +106,12 @@ export default function Cart() {
 
   return (
     <div className="cart">
-      <h1>Cart</h1>
+      <h1>Your demo cart</h1>
+      <p className="demo-product-banner">
+        This cart contains mock.shop merchandise only. Curated High Grade
+        electronics require a consultation. No real payments or orders are
+        processed.
+      </p>
       <CartMain layout="page" cart={cart} />
     </div>
   );

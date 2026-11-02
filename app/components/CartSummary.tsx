@@ -2,7 +2,8 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useEffect, useRef} from 'react';
-import {useFetcher} from 'react-router';
+import {useFetcher, useRouteLoaderData} from 'react-router';
+import type {RootLoader} from '~/root';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -34,6 +35,20 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
 }
 
 function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+  const root = useRouteLoaderData<RootLoader>('root');
+  if (root?.isDemo) {
+    return (
+      <div className="demo-checkout-note">
+        <p>
+          This is a mock.shop demonstration cart. No payment is collected and no
+          real order is placed.
+        </p>
+        <button type="button" disabled>
+          Checkout unavailable in preview
+        </button>
+      </div>
+    );
+  }
   if (!checkoutUrl) return null;
 
   return (

@@ -1,7 +1,4 @@
-import {
-  redirect,
-  useLoaderData,
-} from 'react-router';
+import {redirect, useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -18,7 +15,9 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
-    {title: `Hydrogen | ${data?.product.title ?? ''}`},
+    {
+      title: `${data?.product.title ?? 'Product'} | mock.shop Demo | High Grade`,
+    },
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
@@ -40,11 +39,7 @@ export async function loader(args: Route.LoaderArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({
-  context,
-  params,
-  request,
-}: Route.LoaderArgs) {
+async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {handle} = params;
   const {storefront} = context;
 
@@ -108,6 +103,11 @@ export default function Product() {
     <div className="product">
       <ProductImage image={selectedVariant?.image} />
       <div className="product-main">
+        <p className="demo-product-banner">
+          MOCK.SHOP DEMO MERCHANDISE · This is a Shopify test product, separate
+          from High Grade’s automotive catalog.{' '}
+          <Link to="/demo-shop">Back to demo shop</Link>
+        </p>
         <h1>{title}</h1>
         <ProductPrice
           price={selectedVariant?.price}

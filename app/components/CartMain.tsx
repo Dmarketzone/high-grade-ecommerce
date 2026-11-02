@@ -98,8 +98,8 @@ function CartEmpty({
         started!
       </p>
       <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
-        Continue shopping →
+      <Link to="/demo-shop" onClick={close} prefetch="viewport">
+        Explore mock.shop demo merchandise →
       </Link>
     </div>
   );
