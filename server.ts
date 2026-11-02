@@ -1,7 +1,7 @@
 import * as serverBuild from 'virtual:react-router/server-build';
 import type {Context} from '@netlify/edge-functions';
 import {createRequestHandler, storefrontRedirect} from '@shopify/hydrogen';
-import {createHydrogenRouterContext} from '~/lib/context';
+import {createHydrogenRouterContext} from './app/lib/context';
 
 /**
  * In production we run in Deno (Netlify Edge Functions),

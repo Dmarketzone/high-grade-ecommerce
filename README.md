@@ -9,7 +9,7 @@ Hydrogen is Shopify's stack for headless commerce. Hydrogen is designed to dovet
 
 ## What's included
 
-- Hydrogen 2026.1.0, powered by React Router 7 and Vite
+- Hydrogen 2026.4.8, powered by React Router 7 and Vite
 - Shopify CLI
 - Configured deployment to Netlify, with Server-Side Rendering (SSR) via [Netlify Edge
   Functions](https://docs.netlify.com/edge-functions/overview/)
@@ -39,6 +39,11 @@ npm create @shopify/hydrogen@latest -- --template https://github.com/netlify/hyd
 Then follow the instructions in `.env` and you're ready to start developing.
 
 ## Local development
+
+Install the locked dependencies with `npm ci` first. Installation applies a
+versioned Netlify emulator patch required by current Deno releases. See the
+[development environment notes](docs/development-environment.md) for dependency
+compatibility decisions, security audit scope, and removing the workaround.
 
 ```bash
 npm run dev
